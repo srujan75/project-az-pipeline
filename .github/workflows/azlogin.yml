@@ -29,7 +29,8 @@ jobs:
           done
 
       - name: Upload JSON Files as Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: azure-resources
-          path: "*.json"
+           name: azure-resources
+           path: "*.json"
+        
