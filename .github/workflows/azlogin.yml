@@ -1,10 +1,10 @@
-name: Manual Azure Login
+name: Fetch Azure Resources
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  login-to-azure:
+  fetch-resources:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,5 +16,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Show Azure Account
-        run: az account show
+      - name: Fetch Resource Groups & Resources
+        run: |
+          echo "Fetching Azure resources..."
+          az account show
+          az group list --output json > resource_groups.json
+          echo "Resource Groups saved to resource_groups.json"
+          
+          for rg in $(az group list --query "[].name" -o tsv); do
+            az resource list --resource-group "$rg" --output json > "resources_$rg.json"
+            echo "Fetched resources for $rg"
+          done
+
+      - name: Upload JSON Files as Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: azure-resources
+          path: "*.json"
